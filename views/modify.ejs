@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= heading %> — Inkwell</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --surface: #141416;
+      --border: #252528;
+      --text: #e8e6e0;
+      --muted: #7a7870;
+      --accent: #c9a96e;
+      --accent-dim: rgba(201,169,110,0.12);
+      --radius: 4px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 1.6rem 0;
+    }
+    .header-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .logo span { font-style: italic; font-weight: 400; color: var(--text); }
+    .back-link {
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: color 0.15s;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 3.5rem 2rem;
+      animation: fadeUp 0.35s both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+    }
+    .page-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 2.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.75rem;
+    }
+    label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+    }
+    input[type="text"],
+    textarea {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 300;
+      padding: 0.85rem 1rem;
+      transition: border-color 0.18s, box-shadow 0.18s;
+      outline: none;
+      resize: none;
+    }
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+    textarea { min-height: 220px; line-height: 1.7; }
+
+    .char-count {
+      text-align: right;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.65rem 1.5rem;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.18s;
+      border: none;
+    }
+    .btn-primary { background: var(--accent); color: #0d0d0f; }
+    .btn-primary:hover { background: #dbb97e; }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a href="/" class="logo">Ink<span>well</span></a>
+      <a href="/" class="back-link">← Back to posts</a>
+    </div>
+  </header>
+
+  <main>
+    <h1 class="page-heading"><%= heading %></h1>
+    <p class="page-sub">
+      <% if (post) { %>Editing · <em><%= post.title %></em><% } else { %>Share your thoughts with the world<% } %>
+    </p>
+
+    <form action="/api/posts<%= post ? '/' + post.id : '' %>" method="POST">
+      <div class="form-group">
+        <label for="title">Title</label>
+        <input
+          id="title"
+          type="text"
+          name="title"
+          placeholder="Give your story a compelling title…"
+          value="<%= post ? post.title : '' %>"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="author">Author</label>
+        <input
+          id="author"
+          type="text"
+          name="author"
+          placeholder="Your name"
+          value="<%= post ? post.author : '' %>"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="content">Content</label>
+        <textarea
+          id="content"
+          name="content"
+          placeholder="Write something worth reading…"
+          required
+        ><%= post ? post.content : '' %></textarea>
+        <div class="char-count" id="charCount">0 characters</div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary"><%= submit %></button>
+        <a href="/" class="btn btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    const textarea = document.getElementById('content');
+    const counter  = document.getElementById('charCount');
+    function update() {
+      const n = textarea.value.length;
+      counter.textContent = n.toLocaleString() + ' character' + (n !== 1 ? 's' : '');
+    }
+    textarea.addEventListener('input', update);
+    update();
+  </script>
+</body>
+</html>
