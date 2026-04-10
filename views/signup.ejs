@@ -1,0 +1,38 @@
+<%- include('_nav') %>
+<% const title = 'Sign Up' %>
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h1>Join Inkwell</h1>
+    <p class="subtitle">Create your account and start writing</p>
+
+    <% if (error) { %>
+      <div class="error-box"><%= error %></div>
+    <% } %>
+
+    <form action="/signup" method="POST">
+      <div class="form-group">
+        <label for="displayName">Display Name</label>
+        <input type="text" id="displayName" name="displayName" placeholder="Jane Doe" required autofocus />
+      </div>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="jane_doe" required />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Min. 6 characters" required minlength="6" />
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••" required />
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:0.7rem">Create Account</button>
+    </form>
+
+    <div class="switch-link">
+      Already have an account? <a href="/signin">Sign in</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

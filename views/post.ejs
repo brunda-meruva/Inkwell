@@ -1,0 +1,219 @@
+<%- include('_nav') %>
+<% const title = post.title %>
+<style>
+  .post-wrap { max-width: 720px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+  .back-link {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    color: var(--ink-muted); text-decoration: none; font-size: 0.875rem;
+    margin-bottom: 2rem;
+  }
+  .back-link:hover { color: var(--ink); }
+
+  .post-header { margin-bottom: 2rem; }
+
+  .post-meta-row {
+    display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap;
+  }
+  .author-avatar-lg {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--amber); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; font-weight: 700;
+  }
+  .author-detail-name { font-weight: 500; font-size: 0.95rem; }
+  .author-detail-date { font-size: 0.8rem; color: var(--ink-muted); }
+
+  .topic-pill {
+    margin-left: auto; font-size: 0.72rem; font-weight: 500;
+    background: var(--amber-light); color: var(--amber-dark);
+    padding: 3px 12px; border-radius: 99px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+
+  .post-title-lg {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem; font-weight: 700; line-height: 1.25;
+    margin-bottom: 1rem;
+  }
+
+  .post-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .tag { font-size: 0.75rem; background: var(--cream-dark); color: var(--ink-soft); padding: 3px 10px; border-radius: 3px; }
+
+  .post-body {
+    font-size: 1.05rem; line-height: 1.8; color: var(--ink-soft);
+    border-top: 1px solid var(--border);
+    padding-top: 1.75rem; margin-bottom: 2rem;
+  }
+
+  .post-actions-row {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1.25rem 0; border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border); margin-bottom: 2.5rem;
+  }
+
+  .like-btn {
+    display: flex; align-items: center; gap: 0.4rem;
+    background: none; border: 1px solid var(--border);
+    border-radius: 99px; padding: 0.4rem 1rem;
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; color: var(--ink-soft); transition: all 0.2s;
+  }
+  .like-btn:hover { border-color: var(--red); color: var(--red); }
+  .like-btn.liked { background: #fde8e8; border-color: var(--red); color: var(--red); }
+
+  .edit-actions { margin-left: auto; display: flex; gap: 0.5rem; }
+
+  /* ── Comments ── */
+  .comments-section h2 {
+    font-family: 'Playfair Display', serif; font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .comment {
+    display: flex; gap: 0.9rem; margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem; border-bottom: 1px solid var(--border);
+  }
+  .comment:last-child { border-bottom: none; }
+
+  .comment-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--ink-soft); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+  }
+
+  .comment-body-wrap { flex: 1; }
+  .comment-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.3rem; }
+  .comment-author { font-weight: 500; font-size: 0.875rem; }
+  .comment-time { font-size: 0.775rem; color: var(--ink-muted); }
+  .comment-text { font-size: 0.93rem; color: var(--ink-soft); line-height: 1.6; }
+  .comment-del {
+    margin-left: auto; background: none; border: none;
+    color: var(--ink-muted); cursor: pointer; font-size: 0.8rem;
+    padding: 0 0.25rem;
+  }
+  .comment-del:hover { color: var(--red); }
+
+  .comment-form-box {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 6px; padding: 1.5rem; margin-top: 1.5rem;
+  }
+  .comment-form-box h3 { font-size: 1rem; margin-bottom: 1rem; }
+  .no-comments { color: var(--ink-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+</style>
+
+<div class="post-wrap">
+  <a class="back-link" href="/">← Back to all posts</a>
+
+  <div class="post-header">
+    <div class="post-meta-row">
+      <div class="author-avatar-lg"><%= post.author.displayName[0].toUpperCase() %></div>
+      <div>
+        <div class="author-detail-name"><%= post.author.displayName %> <span style="color:var(--ink-muted);font-weight:400;">@<%= post.author.username %></span></div>
+        <div class="author-detail-date"><%= new Date(post.date).toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'}) %></div>
+      </div>
+      <% if (post.topic) { %><span class="topic-pill"><%= post.topic %></span><% } %>
+    </div>
+
+    <h1 class="post-title-lg"><%= post.title %></h1>
+
+    <% if (post.tags && post.tags.length > 0) { %>
+      <div class="post-tags">
+        <% post.tags.forEach(tag => { %><span class="tag">#<%= tag %></span><% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="post-body"><%= post.content %></div>
+
+  <div class="post-actions-row">
+    <% const isLiked = likedPostIds.includes(post.id); %>
+    <button
+      class="like-btn <%= isLiked ? 'liked' : '' %>"
+      id="like-btn"
+      onclick="handleLike(<%= post.id %>)"
+    >
+      <span id="heart-icon"><%= isLiked ? '❤️' : '🤍' %></span>
+      <span id="like-count"><%= post.likes || 0 %></span> likes
+    </button>
+
+    <% if (currentUser && (post.author.id === currentUser.id || currentUser.role === 'admin')) { %>
+      <div class="edit-actions">
+        <a href="/edit/<%= post.id %>" class="btn btn-outline btn-sm">Edit</a>
+        <a href="/api/posts/delete/<%= post.id %>"
+           class="btn btn-danger btn-sm"
+           onclick="return confirm('Delete this post?')">Delete</a>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Comments -->
+  <div class="comments-section" id="comments">
+    <h2>Comments (<%= comments.length %>)</h2>
+
+    <% if (comments.length === 0) { %>
+      <p class="no-comments">No comments yet. Be the first to share your thoughts!</p>
+    <% } else { %>
+      <% comments.forEach(c => { %>
+        <div class="comment">
+          <div class="comment-avatar"><%= c.author.displayName[0].toUpperCase() %></div>
+          <div class="comment-body-wrap">
+            <div class="comment-header">
+              <span class="comment-author"><%= c.author.displayName %></span>
+              <span class="comment-time"><%= new Date(c.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) %></span>
+              <% if (currentUser && (currentUser.id === c.author.id || currentUser.role === 'admin')) { %>
+                <a
+                  class="comment-del"
+                  href="/api/comments/<%= c.id %>/delete?postId=<%= post.id %>"
+                  onclick="return confirm('Delete comment?')"
+                  title="Delete comment"
+                >✕</a>
+              <% } %>
+            </div>
+            <p class="comment-text"><%= c.content %></p>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+
+    <% if (currentUser) { %>
+      <div class="comment-form-box">
+        <h3>Leave a comment</h3>
+        <form action="/api/posts/<%= post.id %>/comments" method="POST">
+          <div class="form-group">
+            <textarea name="content" placeholder="Share your thoughts…" rows="4"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Post Comment</button>
+        </form>
+      </div>
+    <% } else { %>
+      <div class="comment-form-box" style="text-align:center; color:var(--ink-muted);">
+        <a href="/signin" style="color:var(--amber); font-weight:500;">Sign in</a> to leave a comment.
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<script>
+async function handleLike(postId) {
+  <% if (!currentUser) { %>
+    window.location = '/signin';
+    return;
+  <% } %>
+  try {
+    const res = await fetch(`/api/posts/${postId}/like`, { method: 'POST' });
+    const data = await res.json();
+    document.getElementById('like-count').textContent = data.likes;
+    const btn = document.getElementById('like-btn');
+    const heart = document.getElementById('heart-icon');
+    if (data.action === 'liked') {
+      btn.classList.add('liked'); heart.textContent = '❤️';
+    } else {
+      btn.classList.remove('liked'); heart.textContent = '🤍';
+    }
+  } catch(e) { console.error(e); }
+}
+</script>
+</body>
+</html>

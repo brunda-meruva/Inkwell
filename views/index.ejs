@@ -1,358 +1,190 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Inkwell — Blog</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #0d0d0f;
-      --surface: #141416;
-      --border: #252528;
-      --text: #e8e6e0;
-      --muted: #7a7870;
-      --accent: #c9a96e;
-      --accent-dim: rgba(201,169,110,0.12);
-      --red: #e05c5c;
-      --red-dim: rgba(224,92,92,0.12);
-      --radius: 4px;
-    }
+<%- include('_nav') %>
+<style>
+  .page-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+  }
+  .page-header p { color: var(--ink-muted); margin-top: 0.3rem; }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  .posts-grid { display: flex; flex-direction: column; gap: 1.5rem; }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
-      min-height: 100vh;
-    }
+  .post-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.75rem;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .post-card:hover { box-shadow: 0 6px 28px rgba(26,18,9,0.12); transform: translateY(-1px); }
 
-    /* ── Header ── */
-    header {
-      border-bottom: 1px solid var(--border);
-      padding: 2rem 0 1.6rem;
-      text-align: center;
-      position: relative;
-    }
-    .header-inner {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 0 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .logo {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.2rem;
-      letter-spacing: -0.02em;
-      color: var(--accent);
-    }
-    .logo span { font-style: italic; font-weight: 400; color: var(--text); }
-    .tagline { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-top: 0.2rem; }
+  .post-meta {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin-bottom: 0.85rem; flex-wrap: wrap;
+  }
+  .author-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--amber); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+  }
+  .author-info { display: flex; flex-direction: column; }
+  .author-name { font-size: 0.875rem; font-weight: 500; color: var(--ink); }
+  .post-date { font-size: 0.775rem; color: var(--ink-muted); }
 
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.55rem 1.2rem;
-      border-radius: var(--radius);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 500;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.18s;
-      border: none;
-    }
-    .btn-primary {
-      background: var(--accent);
-      color: #0d0d0f;
-    }
-    .btn-primary:hover { background: #dbb97e; }
-    .btn-ghost {
-      background: transparent;
-      color: var(--muted);
-      border: 1px solid var(--border);
-    }
-    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-danger {
-      background: var(--red-dim);
-      color: var(--red);
-      border: 1px solid transparent;
-    }
-    .btn-danger:hover { background: var(--red); color: #fff; }
+  .topic-pill {
+    margin-left: auto;
+    font-size: 0.72rem; font-weight: 500;
+    background: var(--amber-light); color: var(--amber-dark);
+    padding: 2px 10px; border-radius: 99px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
 
-    /* ── Main layout ── */
-    main {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 3rem 2rem;
-    }
+  .post-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem; font-weight: 700;
+    margin-bottom: 0.6rem;
+    text-decoration: none; color: var(--ink);
+    display: block;
+    transition: color 0.15s;
+  }
+  .post-title:hover { color: var(--amber-dark); }
 
-    /* ── Stats bar ── */
-    .stats-bar {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      margin-bottom: 2.5rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .stat { display: flex; flex-direction: column; }
-    .stat-value { font-size: 1.5rem; font-weight: 500; color: var(--accent); line-height: 1; }
-    .stat-label { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-top: 0.25rem; }
-    .divider-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--border); }
+  .post-excerpt { color: var(--ink-soft); font-size: 0.93rem; margin-bottom: 1.1rem; }
 
-    /* ── Post cards ── */
-    .posts-grid { display: flex; flex-direction: column; gap: 0; }
+  .post-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .tag {
+    font-size: 0.72rem; background: var(--cream-dark);
+    color: var(--ink-soft); padding: 2px 8px; border-radius: 3px;
+  }
 
-    .post-card {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 1.5rem;
-      padding: 2rem 0;
-      border-bottom: 1px solid var(--border);
-      align-items: start;
-      transition: background 0.15s;
-      animation: fadeUp 0.4s both;
-    }
-    .post-card:nth-child(1) { animation-delay: 0.05s; }
-    .post-card:nth-child(2) { animation-delay: 0.10s; }
-    .post-card:nth-child(3) { animation-delay: 0.15s; }
-    .post-card:nth-child(4) { animation-delay: 0.20s; }
-    .post-card:nth-child(5) { animation-delay: 0.25s; }
+  .post-footer {
+    display: flex; align-items: center; gap: 1rem;
+    padding-top: 1rem; border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+  .like-btn {
+    display: flex; align-items: center; gap: 0.4rem;
+    background: none; border: 1px solid var(--border);
+    border-radius: 99px; padding: 0.3rem 0.85rem;
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+    font-size: 0.83rem; color: var(--ink-soft);
+    transition: all 0.2s;
+  }
+  .like-btn:hover { border-color: var(--red); color: var(--red); }
+  .like-btn.liked { background: #fde8e8; border-color: var(--red); color: var(--red); }
+  .like-btn .heart { font-size: 0.95rem; }
 
-    .post-meta {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.65rem;
-    }
-    .author-badge {
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.05em;
-      color: var(--accent);
-      text-transform: uppercase;
-    }
-    .sep { color: var(--border); }
-    .post-date { font-size: 0.72rem; color: var(--muted); }
+  .comment-count {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.83rem; color: var(--ink-muted);
+    text-decoration: none;
+  }
+  .comment-count:hover { color: var(--ink); }
 
-    .post-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.35rem;
-      font-weight: 700;
-      line-height: 1.3;
-      color: var(--text);
-      margin-bottom: 0.7rem;
-      letter-spacing: -0.01em;
-    }
-    .post-title:hover { color: var(--accent); cursor: default; }
+  .post-actions { margin-left: auto; display: flex; gap: 0.5rem; }
 
-    .post-excerpt {
-      font-size: 0.9rem;
-      line-height: 1.7;
-      color: var(--muted);
+  .empty-state {
+    text-align: center; padding: 4rem 2rem;
+    color: var(--ink-muted);
+  }
+  .empty-state h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--ink); }
+</style>
 
-    }
+<div class="container">
+  <div class="page-header">
+    <h1>Latest Stories</h1>
+    <p>Thoughts, ideas, and explorations from our community</p>
+  </div>
 
-    .post-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      align-items: flex-end;
-      padding-top: 0.25rem;
-    }
-
-    /* ── Empty state ── */
-    .empty-state {
-      text-align: center;
-      padding: 5rem 0;
-    }
-    .empty-icon { font-size: 3rem; margin-bottom: 1.2rem; opacity: 0.3; }
-    .empty-state h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 0.5rem; }
-    .empty-state p { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
-
-    /* ── Neo4j badge ── */
-    .neo-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.68rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 100px;
-      padding: 0.3rem 0.75rem;
-    }
-    .neo-dot { width: 6px; height: 6px; border-radius: 50%; background: #4CAF50; flex-shrink: 0; animation: pulse 2s infinite; }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-
-    /* ── Footer ── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 2.5rem 0;
-      margin-top: 4rem;
-      text-align: center;
-    }
-    .footer-inner {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 0 2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-    }
-    .footer-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-    .footer-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.01em;
-    }
-    .footer-reg {
-      display: inline-block;
-      background: #2d4a2d;
-      color: #7ec87e;
-      font-size: 0.78rem;
-      font-weight: 500;
-      letter-spacing: 0.05em;
-      padding: 0.35rem 1rem;
-      border-radius: 4px;
-    }
-    .footer-uni {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.5rem 1rem;
-      margin-top: 0.25rem;
-    }
-    .footer-uni-logo {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #8b1a1a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.6rem;
-      font-weight: 700;
-      color: #fff;
-      flex-shrink: 0;
-      letter-spacing: 0.05em;
-    }
-    .footer-uni-name {
-      display: flex;
-      flex-direction: column;
-      text-align: left;
-    }
-    .footer-uni-top {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #8b1a1a;
-      letter-spacing: 0.04em;
-    }
-    .footer-uni-bottom {
-      font-size: 0.7rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="header-inner">
-      <div>
-        <div class="logo">Ink<span>well</span></div>
-        <div class="tagline">A space to read &amp; think</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:1rem;">
-        <span class="neo-badge"><span class="neo-dot"></span>Neo4j</span>
-        <a href="/new" class="btn btn-primary">+ New Post</a>
-      </div>
+  <% if (posts.length === 0) { %>
+    <div class="empty-state">
+      <h2>No posts yet</h2>
+      <p>Be the first to share something.</p>
+      <% if (currentUser) { %>
+        <a href="/new" class="btn btn-primary" style="margin-top:1rem">Write a Post</a>
+      <% } %>
     </div>
-  </header>
+  <% } else { %>
+    <div class="posts-grid">
+      <% posts.forEach(post => { %>
+        <article class="post-card">
+          <div class="post-meta">
+            <div class="author-avatar"><%= post.author.displayName[0].toUpperCase() %></div>
+            <div class="author-info">
+              <span class="author-name"><%= post.author.displayName %></span>
+              <span class="post-date"><%= new Date(post.date).toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'}) %></span>
+            </div>
+            <% if (post.topic) { %><span class="topic-pill"><%= post.topic %></span><% } %>
+          </div>
 
-  <main>
-    <div class="stats-bar">
-      <div class="stat">
-        <span class="stat-value"><%= posts.length %></span>
-        <span class="stat-label">Articles</span>
-      </div>
-      <div class="divider-dot"></div>
-      <div class="stat">
-        <span class="stat-value"><%= [...new Set(posts.map(p => p.author))].length %></span>
-        <span class="stat-label">Authors</span>
-      </div>
-    </div>
+          <a class="post-title" href="/post/<%= post.id %>"><%= post.title %></a>
 
-    <% if (posts.length === 0) { %>
-      <div class="empty-state">
-        <div class="empty-icon">✦</div>
-        <h3>No stories yet</h3>
-        <p>Be the first to write something worth reading.</p>
-        <a href="/new" class="btn btn-primary">Write a post</a>
-      </div>
-    <% } else { %>
-      <div class="posts-grid">
-        <% posts.forEach(post => { %>
-          <article class="post-card">
-            <div>
-              <div class="post-meta">
-                <span class="author-badge"><%= post.author %></span>
-                <span class="sep">·</span>
-                <span class="post-date">
-                  <%= new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
-                </span>
+          <p class="post-excerpt"><%= post.content.substring(0, 180) %><%= post.content.length > 180 ? '…' : '' %></p>
+
+          <% if (post.tags && post.tags.length > 0) { %>
+            <div class="post-tags">
+              <% post.tags.forEach(tag => { %><span class="tag">#<%= tag %></span><% }) %>
+            </div>
+          <% } %>
+
+          <div class="post-footer">
+            <% const isLiked = likedPostIds.includes(post.id); %>
+            <button
+              class="like-btn <%= isLiked ? 'liked' : '' %>"
+              onclick="handleLike(this, <%= post.id %>)"
+              data-post-id="<%= post.id %>"
+              <%= !currentUser ? 'title="Sign in to like" onclick="window.location=\'/signin\'" ' : '' %>
+            >
+              <span class="heart"><%= isLiked ? '❤️' : '🤍' %></span>
+              <span class="like-count"><%= post.likes || 0 %></span>
+            </button>
+
+            <a class="comment-count" href="/post/<%= post.id %>#comments">
+              💬 <%= post.commentCount || 0 %> comments
+            </a>
+
+            <% if (currentUser && (post.author.id === currentUser.id || currentUser.role === 'admin')) { %>
+              <div class="post-actions">
+                <a href="/edit/<%= post.id %>" class="btn btn-outline btn-sm">Edit</a>
+                <a href="/api/posts/delete/<%= post.id %>"
+                   class="btn btn-danger btn-sm"
+                   onclick="return confirm('Delete this post?')">Delete</a>
               </div>
-              <h2 class="post-title"><%= post.title %></h2>
-              <p class="post-excerpt"><%= post.content %></p>
-            </div>
-            <div class="post-actions">
-              <a href="/edit/<%= post.id %>" class="btn btn-ghost">Edit</a>
-              <a href="/api/posts/delete/<%= post.id %>"
-                 class="btn btn-danger"
-                 onclick="return confirm('Delete this post?')">Delete</a>
-            </div>
-          </article>
-        <% }) %>
-      </div>
-    <% } %>
-  </main>
-
-  <footer>
-    <div class="footer-inner">
-      <span class="footer-label">Developed by</span>
-      <span class="footer-name">Brunda Meruva</span>
-      <span class="footer-reg">Reg No: 23BCE7037</span>
-      <div class="footer-uni">
-        <img src="/vitap-logo.png" alt="VIT-AP University" style="height:60px; filter: brightness(0) invert(1) sepia(1) saturate(2) hue-rotate(320deg);" />
-      </div>
+            <% } %>
+          </div>
+        </article>
+      <% }) %>
     </div>
-  </footer>
+  <% } %>
+</div>
+
+<script>
+async function handleLike(btn, postId) {
+  <% if (!currentUser) { %>
+    window.location = '/signin';
+    return;
+  <% } %>
+  try {
+    const res = await fetch(`/api/posts/${postId}/like`, { method: 'POST' });
+    const data = await res.json();
+    btn.querySelector('.like-count').textContent = data.likes;
+    if (data.action === 'liked') {
+      btn.classList.add('liked');
+      btn.querySelector('.heart').textContent = '❤️';
+    } else {
+      btn.classList.remove('liked');
+      btn.querySelector('.heart').textContent = '🤍';
+    }
+  } catch(e) { console.error(e); }
+}
+</script>
 </body>
 </html>

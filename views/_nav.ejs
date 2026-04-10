@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= typeof title !== 'undefined' ? title + ' — Inkwell' : 'Inkwell' %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #1a1209;
+      --ink-soft: #4a3f30;
+      --ink-muted: #8c7d6a;
+      --cream: #faf7f2;
+      --cream-dark: #f0ebe0;
+      --amber: #c8873a;
+      --amber-dark: #a0672a;
+      --amber-light: #f5dbb5;
+      --red: #c0392b;
+      --green: #2e7d52;
+      --border: rgba(26,18,9,0.12);
+      --shadow: 0 2px 16px rgba(26,18,9,0.08);
+      --radius: 4px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--ink);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    }
+
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--amber-light);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-logo span { color: var(--amber); font-style: italic; }
+
+    .nav-links { display: flex; align-items: center; gap: 0.5rem; }
+
+    .nav-links a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.4rem 0.9rem;
+      border-radius: var(--radius);
+      transition: all 0.2s;
+    }
+    .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+    .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1.1rem; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 500; cursor: pointer; text-decoration: none; border: none; transition: all 0.2s; }
+
+    .btn-primary { background: var(--amber); color: #fff; }
+    .btn-primary:hover { background: var(--amber-dark); }
+    .btn-ghost { background: transparent; color: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.25); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--border); }
+    .btn-outline:hover { background: var(--cream-dark); }
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-danger:hover { opacity: 0.85; }
+    .btn-sm { padding: 0.3rem 0.75rem; font-size: 0.8rem; }
+
+    .user-badge {
+      display: flex; align-items: center; gap: 0.5rem;
+      color: rgba(255,255,255,0.6); font-size: 0.8rem;
+    }
+    .user-badge .avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--amber); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700;
+    }
+    .admin-badge {
+      font-size: 0.65rem; background: var(--amber); color: #fff;
+      padding: 1px 6px; border-radius: 99px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    /* ── MAIN WRAPPER ── */
+    .container { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+    .container-wide { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+    /* ── FORMS ── */
+    .form-group { margin-bottom: 1.25rem; }
+    label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--ink-soft); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    input[type=text], input[type=password], textarea, select {
+      width: 100%; padding: 0.65rem 0.9rem; border: 1px solid var(--border);
+      border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+      background: #fff; color: var(--ink); transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--amber); }
+    textarea { resize: vertical; min-height: 160px; }
+
+    .error-box {
+      background: #fde8e8; border: 1px solid #f5c6c6; color: var(--red);
+      padding: 0.75rem 1rem; border-radius: var(--radius); margin-bottom: 1.25rem;
+      font-size: 0.9rem;
+    }
+
+    /* ── AUTH CARD ── */
+    .auth-wrap {
+      min-height: calc(100vh - 60px); display: flex;
+      align-items: center; justify-content: center; padding: 2rem;
+    }
+    .auth-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 8px;
+      padding: 2.5rem; width: 100%; max-width: 420px;
+      box-shadow: var(--shadow);
+    }
+    .auth-card h1 {
+      font-family: 'Playfair Display', serif; font-size: 1.8rem;
+      margin-bottom: 0.25rem;
+    }
+    .auth-card .subtitle { color: var(--ink-muted); font-size: 0.9rem; margin-bottom: 1.75rem; }
+    .auth-card .switch-link { margin-top: 1.25rem; text-align: center; font-size: 0.875rem; color: var(--ink-muted); }
+    .auth-card .switch-link a { color: var(--amber); text-decoration: none; font-weight: 500; }
+  </style>
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="/"><span>Ink</span>well</a>
+  <div class="nav-links">
+    <a href="/graph">Knowledge Graph</a>
+    <% if (currentUser) { %>
+      <a href="/new" class="btn btn-primary btn-sm">+ New Post</a>
+      <div class="user-badge" style="margin-left:0.5rem">
+        <div class="avatar"><%= currentUser.displayName[0].toUpperCase() %></div>
+        <span><%= currentUser.displayName %></span>
+        <% if (currentUser.role === 'admin') { %><span class="admin-badge">admin</span><% } %>
+      </div>
+      <a href="/signout" class="btn btn-ghost btn-sm">Sign out</a>
+    <% } else { %>
+      <a href="/signin">Sign in</a>
+      <a href="/signup" class="btn btn-primary btn-sm">Sign up</a>
+    <% } %>
+  </div>
+</nav>

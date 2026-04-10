@@ -1,0 +1,237 @@
+<%- include('_nav') %>
+<% const title = 'Knowledge Graph' %>
+<style>
+  body { overflow: hidden; }
+  .graph-wrap { height: calc(100vh - 60px); position: relative; background: var(--ink); }
+
+  #graph-canvas { width: 100%; height: 100%; }
+
+  .graph-legend {
+    position: absolute; top: 1.5rem; left: 1.5rem;
+    background: rgba(26,18,9,0.85); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+    padding: 1rem 1.25rem; color: rgba(255,255,255,0.85);
+    font-size: 0.8rem;
+  }
+  .graph-legend h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem; color: var(--amber-light); margin-bottom: 0.75rem;
+  }
+  .legend-item { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+
+  .graph-tooltip {
+    position: absolute; pointer-events: none;
+    background: rgba(26,18,9,0.92); color: #fff;
+    padding: 0.5rem 0.85rem; border-radius: 5px;
+    font-size: 0.8rem; max-width: 220px; line-height: 1.5;
+    display: none;
+  }
+
+  .graph-controls {
+    position: absolute; bottom: 1.5rem; right: 1.5rem;
+    display: flex; flex-direction: column; gap: 0.4rem;
+  }
+  .ctrl-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(200,135,58,0.9); color: #fff; border: none;
+    font-size: 1rem; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .ctrl-btn:hover { background: var(--amber-dark); }
+
+  .graph-stats {
+    position: absolute; top: 1.5rem; right: 1.5rem;
+    background: rgba(26,18,9,0.85); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+    padding: 0.85rem 1.1rem; color: rgba(255,255,255,0.7);
+    font-size: 0.8rem; min-width: 140px;
+  }
+  .graph-stats h4 { color: var(--amber-light); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+  .stat-row { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 0.2rem; }
+  .stat-val { color: #fff; font-weight: 500; }
+</style>
+
+<div class="graph-wrap">
+  <svg id="graph-canvas"></svg>
+
+  <div class="graph-legend">
+    <h3>Knowledge Graph</h3>
+    <div class="legend-item"><div class="legend-dot" style="background:#c8873a"></div> Post</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#5b9cf6"></div> Author</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#52b788"></div> Tag</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#e07b54"></div> Topic</div>
+    <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);font-size:0.72rem;">
+      Drag nodes · Scroll to zoom
+    </div>
+  </div>
+
+  <div class="graph-stats" id="stats">
+    <h4>Graph Stats</h4>
+    <div class="stat-row"><span>Nodes</span><span class="stat-val" id="s-nodes">—</span></div>
+    <div class="stat-row"><span>Edges</span><span class="stat-val" id="s-edges">—</span></div>
+    <div class="stat-row"><span>Posts</span><span class="stat-val" id="s-posts">—</span></div>
+    <div class="stat-row"><span>Authors</span><span class="stat-val" id="s-authors">—</span></div>
+    <div class="stat-row"><span>Tags</span><span class="stat-val" id="s-tags">—</span></div>
+  </div>
+
+  <div class="graph-tooltip" id="tooltip"></div>
+
+  <div class="graph-controls">
+    <button class="ctrl-btn" onclick="zoom(1.3)" title="Zoom in">+</button>
+    <button class="ctrl-btn" onclick="zoom(0.77)" title="Zoom out">−</button>
+    <button class="ctrl-btn" onclick="resetZoom()" title="Reset">⟳</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+const rawData = <%- graphData %>;
+
+// Build nodes & links
+const nodes = [];
+const links = [];
+const nodeMap = {};
+
+function getOrCreate(id, label, type, extra = {}) {
+  if (!nodeMap[id]) {
+    const n = { id, label, type, ...extra };
+    nodes.push(n);
+    nodeMap[id] = n;
+  }
+  return nodeMap[id];
+}
+
+rawData.forEach(row => {
+  const post = getOrCreate('post:' + row.postId, row.postTitle, 'post', { likes: row.likeCount, postId: row.postId });
+  const author = getOrCreate('author:' + row.author, row.authorName || row.author, 'author', { username: row.author });
+
+  links.push({ source: 'author:' + row.author, target: 'post:' + row.postId, rel: 'AUTHORED' });
+
+  if (row.topic) {
+    const topic = getOrCreate('topic:' + row.topic, row.topic, 'topic');
+    links.push({ source: 'post:' + row.postId, target: 'topic:' + row.topic, rel: 'BELONGS_TO' });
+  }
+
+  (row.tags || []).forEach(tag => {
+    if (!tag) return;
+    getOrCreate('tag:' + tag, tag, 'tag');
+    links.push({ source: 'post:' + row.postId, target: 'tag:' + tag, rel: 'TAGGED_WITH' });
+  });
+});
+
+// Stats
+document.getElementById('s-nodes').textContent = nodes.length;
+document.getElementById('s-edges').textContent = links.length;
+document.getElementById('s-posts').textContent = nodes.filter(n => n.type === 'post').length;
+document.getElementById('s-authors').textContent = nodes.filter(n => n.type === 'author').length;
+document.getElementById('s-tags').textContent = nodes.filter(n => n.type === 'tag').length;
+
+const colors = { post: '#c8873a', author: '#5b9cf6', tag: '#52b788', topic: '#e07b54' };
+const radii = { post: 16, author: 20, tag: 10, topic: 14 };
+
+const svg = d3.select('#graph-canvas');
+const width = window.innerWidth;
+const height = window.innerHeight - 60;
+svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+const g = svg.append('g');
+
+// Zoom
+const zoomBehavior = d3.zoom().scaleExtent([0.2, 4]).on('zoom', e => g.attr('transform', e.transform));
+svg.call(zoomBehavior);
+
+function zoom(factor) {
+  svg.transition().duration(300).call(zoomBehavior.scaleBy, factor);
+}
+function resetZoom() {
+  svg.transition().duration(400).call(zoomBehavior.transform, d3.zoomIdentity.translate(width / 2, height / 2).scale(0.8));
+}
+
+// Arrows
+svg.append('defs').selectAll('marker')
+  .data(['AUTHORED', 'TAGGED_WITH', 'BELONGS_TO'])
+  .enter().append('marker')
+  .attr('id', d => 'arrow-' + d)
+  .attr('viewBox', '0 -5 10 10')
+  .attr('refX', 24).attr('refY', 0)
+  .attr('markerWidth', 6).attr('markerHeight', 6)
+  .attr('orient', 'auto')
+  .append('path').attr('d', 'M0,-5L10,0L0,5')
+  .attr('fill', 'rgba(255,255,255,0.2)');
+
+const linkEl = g.append('g').selectAll('line')
+  .data(links).enter().append('line')
+  .attr('stroke', 'rgba(255,255,255,0.15)')
+  .attr('stroke-width', 1.5)
+  .attr('marker-end', d => `url(#arrow-${d.rel})`);
+
+const nodeEl = g.append('g').selectAll('g')
+  .data(nodes).enter().append('g')
+  .attr('class', 'node')
+  .style('cursor', 'pointer')
+  .call(d3.drag()
+    .on('start', (e, d) => { if (!e.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+    .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
+    .on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; })
+  );
+
+nodeEl.append('circle')
+  .attr('r', d => radii[d.type] || 12)
+  .attr('fill', d => colors[d.type] || '#aaa')
+  .attr('stroke', 'rgba(255,255,255,0.3)')
+  .attr('stroke-width', 2);
+
+nodeEl.append('text')
+  .attr('text-anchor', 'middle')
+  .attr('dy', d => (radii[d.type] || 12) + 14)
+  .attr('font-size', '10px')
+  .attr('fill', 'rgba(255,255,255,0.75)')
+  .attr('font-family', 'DM Sans, sans-serif')
+  .text(d => d.label.length > 22 ? d.label.substring(0, 20) + '…' : d.label);
+
+// Tooltip
+const tooltip = document.getElementById('tooltip');
+nodeEl
+  .on('mouseover', (e, d) => {
+    let html = `<strong>${d.label}</strong><br/><em style="opacity:.7">${d.type}</em>`;
+    if (d.type === 'post') html += `<br/>❤️ ${d.likes || 0} likes`;
+    if (d.type === 'author') html += `<br/>@${d.username}`;
+    tooltip.innerHTML = html;
+    tooltip.style.display = 'block';
+  })
+  .on('mousemove', e => {
+    tooltip.style.left = (e.clientX + 14) + 'px';
+    tooltip.style.top = (e.clientY - 10) + 'px';
+  })
+  .on('mouseleave', () => { tooltip.style.display = 'none'; })
+  .on('click', (e, d) => {
+    if (d.type === 'post' && d.postId) window.location = '/post/' + d.postId;
+  });
+
+// Simulation
+const sim = d3.forceSimulation(nodes)
+  .force('link', d3.forceLink(links).id(d => d.id).distance(d => {
+    if (d.rel === 'AUTHORED') return 120;
+    if (d.rel === 'TAGGED_WITH') return 90;
+    return 110;
+  }))
+  .force('charge', d3.forceManyBody().strength(-350))
+  .force('center', d3.forceCenter(width / 2, height / 2))
+  .force('collision', d3.forceCollide().radius(d => (radii[d.type] || 12) + 18))
+  .on('tick', () => {
+    linkEl
+      .attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+      .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+    nodeEl.attr('transform', d => `translate(${d.x},${d.y})`);
+  });
+
+window.addEventListener('resize', () => {
+  const w = window.innerWidth, h = window.innerHeight - 60;
+  svg.attr('viewBox', `0 0 ${w} ${h}`);
+  sim.force('center', d3.forceCenter(w / 2, h / 2)).alpha(0.3).restart();
+});
+</script>
+</body>
+</html>

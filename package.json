@@ -1,23 +1,19 @@
 {
-  "name": "inkwell-blog",
-  "version": "1.0.0",
-  "description": "Blog with Neo4j backend",
-  "main": "app.js",
+  "name": "inkwell",
+  "version": "2.0.0",
+  "description": "A Neo4j-powered blog with auth, likes, comments, and knowledge graph",
   "type": "module",
+  "main": "app.js",
   "scripts": {
-    "start": "node app.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "engines": {
-    "node": ">=18.0.0"
+    "start": "node app.js",
+    "dev": "node --watch app.js"
   },
   "dependencies": {
-    "body-parser": "^2.2.2",
-    "dotenv": "^17.4.1",
-    "ejs": "^3.1.10",
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "ejs": "^3.1.9",
     "express": "^4.18.2",
-    "neo4j-driver": "^5.28.1"
+    "express-session": "^1.17.3",
+    "neo4j-driver": "^5.12.0"
   }
 }
