@@ -1,6 +1,5 @@
 // db.js — Neo4j driver singleton
 import neo4j from "neo4j-driver";
-import "dotenv/config";
 
 const NEO4J_URI = process.env.NEO4J_URI;
 const NEO4J_USER = process.env.NEO4J_USER;
